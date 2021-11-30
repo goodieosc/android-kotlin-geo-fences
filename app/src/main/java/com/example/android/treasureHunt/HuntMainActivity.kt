@@ -334,12 +334,33 @@ class HuntMainActivity : AppCompatActivity() {
     }
 
     /**
-     * Removes geofences. This method should be called after the user has granted the location
+     * Removes geofences once the broadcast of a geofence being triggered is successful. This method should be called after the user has granted the location
      * permission.
      */
     private fun removeGeofences() {
-        // TODO: Step 12 add in code to remove the geofences
+
+        //check if foreground permissions have been approved, if they have not then return.
+        if (!foregroundAndBackgroundLocationPermissionApproved()) {
+            return
+        }
+
+        //Call removeGeofences() on the geofencingClient and pass in the geofencePendingIntent
+        geofencingClient.removeGeofences(geofencePendingIntent)?.run {
+
+            //Add an onSuccessListener(), update the user that the geofences were successfully removed through a toast.
+            addOnSuccessListener {
+                Log.d(TAG, getString(R.string.geofences_removed))
+                Toast.makeText(applicationContext, R.string.geofences_removed, Toast.LENGTH_SHORT)
+                    .show()
+            }
+
+            //Add an onFailureListener() where you log that the geofences weren’t removed.
+            addOnFailureListener {
+                Log.d(TAG, getString(R.string.geofences_not_removed))
+            }
+        }
     }
+
     companion object {
         internal const val ACTION_GEOFENCE_EVENT =
             "HuntMainActivity.treasureHunt.action.ACTION_GEOFENCE_EVENT"
